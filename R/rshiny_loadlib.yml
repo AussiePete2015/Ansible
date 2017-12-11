@@ -1,0 +1,8 @@
+- name: configuring R
+  hosts: rs_preprod
+  tasks:
+    - name: adding packages
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cran.rstudio.com/')); print('Added'); } else { print('Already installed'); }"
+      with_items:
+        - shiny
+      become: yes
