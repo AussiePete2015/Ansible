@@ -1,0 +1,5 @@
+[tbdb_postgresql]
+[pg_db_prod]
+<IP Address> ansible_ssh_user=ssh-vpn-user ansible_ssh_private_key_file=/home/pbirksmith/Workspace/keys/prod-private-key.pem
+[pg_db_dev]
+<IP Address> ansible_ssh_user=ssh-vpn-user ansible_ssh_private_key_file=/home/pbirksmith/Workspace/keys/preprod-private-key.pem
