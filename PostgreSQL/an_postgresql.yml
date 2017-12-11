@@ -211,10 +211,10 @@
         owner: "{{ pg_user }}"
         group: "{{ pg_group }}"
 
-   - name: Configure pg_mdm_dbtbs.sql
+   - name: Configure pg_dbtbs.sql
      template:
-        src: pg_mdm_dbtbs.sql.j2
-        dest: "/tmp/pg_mdm_dbtbs.sql"
+        src: pg_dbtbs.sql.j2
+        dest: "/tmp/pg_dbtbs.sql"
         owner: "{{ pg_user }}"
         group: "{{ pg_group }}"
 
