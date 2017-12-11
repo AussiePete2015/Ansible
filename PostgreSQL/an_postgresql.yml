@@ -21,6 +21,8 @@
      pg_ver4: 9.5.4
      pg_ver5: 9.5.5
      pg_ver6: 9.5.6
+     pg_sql5: pgsql-9.5
+     pg_sql6: pgsql-9.6
      pg_pck_ver1: 1PGDG
      pg_pck_ver2: 2PGDG
      pg_rhel_ver: rhel7.x86_64
@@ -170,7 +172,7 @@
    - name: Initialise pg database
      become: yes
      become_user: "{{ pg_user }}"
-     command: "/usr/pgsql-9.5/bin/initdb -D /data/pgsql/data"
+     command: "/usr/{{ pg_sql5 }}/bin/initdb -D /data/pgsql/data"
      when: not pgdata_dir_version.stat.exists
 
    - name: Create postgres user
@@ -185,7 +187,7 @@
    - name: Start PostgreSQL
      become: yes
      become_user: "{{ pg_user }}"
-     command: /usr/pgsql-9.5/bin/pg_ctl -D /data/pgsql/data -l logfile start
+     command: /usr/{{ pg_sql5 }}/bin/pg_ctl -D /data/pgsql/data -l logfile start
 
 # Set the configuration for PostgreSQL
    - name: Configure postgresql.conf
@@ -213,13 +215,6 @@
      template:
         src: pg_mdm_dbtbs.sql.j2
         dest: "/tmp/pg_mdm_dbtbs.sql"
-        owner: "{{ pg_user }}"
-        group: "{{ pg_group }}"
-
-   - name: Configure pg_tac_dbtbs.sql
-     template:
-        src: pg_tac_dbtbs.sql.j2
-        dest: "/tmp/pg_tac_dbtbs.sql"
         owner: "{{ pg_user }}"
         group: "{{ pg_group }}"
 
