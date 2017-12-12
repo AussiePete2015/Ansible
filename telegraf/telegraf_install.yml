@@ -1,0 +1,61 @@
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+#
+- name: Install Telegraf Software to TAC Server
+  hosts: dev
+  become: yes
+  become_user: root
+
+  vars:
+     src_location_dir: /home/pbirksmith/Workspace
+     talend_software_dir: /data/talend
+     talend_tac_dir: talendadmin
+     talend_data_dir: /data/talend
+     talend_tmp_dir: /tmp
+     talend_service_dir: /etc/systemd/system
+     yum_repo_dir: /etc/yum.repos.d
+     telegraf_url: https://dl.influxdata.com/telegraf/releases/telegraf-1.4.0-1.x86_64.rpm
+     telegraf_sha256: 4aeb6ce95b6958b5b0d524a030f6b2db8ae1ba538cb3cfbe0d97413353f182c2
+
+  tasks:
+   - name: Installing Python
+     yum:
+       name: '{{ item }}'
+       state: latest
+     with_items:
+     - python27
+     - python2-tools
+     - gcc
+     - openssl-devel
+     - git
+#
+# Installing PIP dependensies
+   - pip:
+       name: '{{ item }}'
+       state: present
+     with_items:
+     - urllib3
+     - pyopenssl
+#
+# Install influxdb
+#  
+   - name: Add yum repository RedHat
+     yum:
+       name: influxdb
+       state: latest
+#
+# influxdb.repo
+   - name: Configure tomcat talend resource configuration
+     template:
+       src: influxdb.repo.j2
+       dest: '{{ yum_repo_dir }}/influxdb.repo
+#
+# Install telegraf
+#
+   - name: Install telegraf
+     yum: 
+       name: telegraf
+       state: latest
+
+
+
