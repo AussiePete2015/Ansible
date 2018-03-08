@@ -1,0 +1,77 @@
+# Create nginx directories
+#
+- name: create nginx directory /data/www
+  file:
+    path: '{{ www_dir }}'
+    state: directory
+    mode: 0755
+  tags: '/data/www dir'
+
+- name: create nginx directory /data/www/image
+  file:
+    path: '{{ www_dir }}{{ img_dir }}'
+    state: directory
+    mode: 0755
+  tags: '/data/www/image dir'
+
+- name: create nginx directory /data/www/scripts
+  file:
+    path: '{{ www_dir }}{{ script_dir }}'
+    state: directory
+    mode: 0755
+  tags: '/data/www/scripts dir'
+
+- name: create nginx directory /data/www/media
+  file:
+    path: '{{ www_dir }}{{ media_dir }}'
+    state: directory
+    mode: 0755
+  tags: '/data/www/media dir'
+
+- name: create nginx directory /data/www/test1
+  file:
+    path: '{{ www_dir }}/test1'
+    state: directory
+    mode: 0755
+    owner: '{{ test1_user }}'
+    group: '{{ test1_group }}'
+  tags: '/data/www/test1 dir'
+
+- name: create nginx directory /data/www/test2
+  file:
+    path: '{{ www_dir }}/test2'
+    state: directory
+    mode: 0744
+    owner: '{{ test2_user }}'
+    group: '{{ test2_group }}'
+  tags: '/data/www/test2 dir'
+
+- name: create nginx directory /data/www/test3
+  file:
+    path: '{{ www_dir }}/test3'
+    state: directory
+    mode: 0755
+    owner: '{{ test3_user }}'
+    group: '{{ test3_group }}'
+  tags: '/data/www/test3 dir'
+
+- name: create nginx directory /data/www/geo
+  file:
+    path: '{{ www_dir }}/geo'
+    state: directory
+    mode: 0755
+  tags: '/data/www/geo dir'
+
+- name: create nginx directory /data/www/geo/maps
+  file:
+    path: '{{ www_dir }}/geo/maps'
+    state: directory
+    mode: 0755
+  tags: '/data/www/geo/maps dir'
+
+- name: create nginx directory /data/www/bisystems
+  file:
+    path: '{{ www_dir }}/bisystems'
+    state: directory
+    mode: 0755
+  tags: '/data/www/bisystems dir'
