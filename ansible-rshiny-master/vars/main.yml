@@ -1,0 +1,39 @@
+# R Shiny default variables
+#
+epel_ver: 7.noarch
+rbase_ver: 3.3.3
+rs_ver: 1.0.143-x86_64
+shiny_ver: 1.5.3.838
+py2_ver: 2.7.5
+py3_ver: 3.4.2
+miconda3_ver: 4.3.14
+
+# R accounts
+cloud_user: user
+shiny_user: shiny
+shiny_group: shiny_apps
+shiny_pwd: <Create a password>
+
+proxy_user:
+proxy_pwd:
+#  proxy_pwd: <Create a password>
+
+proxy_env:
+http_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@<domain>:8080
+https_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@<domain>:8080
+ml_renviron: |
+    # EDH_USER = "sXXXXXX"
+    # EDH_PROD_PASSWORD = <Create a password>
+    # EDH_NONPROD_PASSWORD = <Create a password>
+    http_proxy=http://<domain>:8080
+    http_proxy_user={{ proxy_user }}:{{ proxy_pwd }}
+    https_proxy=https://<domain>:8080
+    https_proxy_user={{ proxy_user }}:{{ proxy_pwd }}
+
+# Folders & download get_url
+cloud_user_dir: /home/user
+miniconda_dir: /opt/miniconda
+
+rserver_url: https://download2.rstudio.org
+rshiny_url: https://download3.rstudio.org
+miniconda_url: https://repo.continuum.io/miniconda
