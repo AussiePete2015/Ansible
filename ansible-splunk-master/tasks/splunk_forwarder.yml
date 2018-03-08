@@ -1,0 +1,23 @@
+# Install splunk splunkforwarder
+- yum:
+    name: '/tmp/{{ splunkfwd_package }}'
+    state: present
+  tags:
+    - [splunk install]
+
+- name: Set the deploymentclient
+  template:
+    src: deploymentclient.conf.j2
+    dest: '{{ splunk_home}}/etc/system/local'
+  tags:
+    - [deploymentclient]
+
+- name: Set the Splunk CLI options
+  command: splunk set deploy-poll <IP_address>/hostname>:<management_port>
+  tags:
+    - [deploy-poll]
+
+- name: Restart splunk
+  command: splunk restart
+  tags:
+    - [restart]
