@@ -1,0 +1,9 @@
+# Test the welcome page
+#
+- action: uri url=http://127.0.0.1 return_content=yes
+  register: webpage_welcome
+  tags: 'Call nginx test page'
+
+- fail: msg='service is not happy'
+  when: "'Test Page for the Nginx HTTP Server on Fedora' not in webpage_welcome.content"
+  tags: 'confirm nginx test message exists'  
