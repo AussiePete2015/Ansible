@@ -1,0 +1,20 @@
+# Install pre-req packages
+
+- name: Install prereq_apps
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+  - git
+  - npm
+  - htop
+  - tmux
+  - nodejs
+  - gcc
+  - openssl
+  - openssl-devel
+  - zlib
+  - zlib-devel
+  - pcre
+  - pcre-devel
+  tags: 'prereq apps install'
