@@ -1,0 +1,45 @@
+# PostgreSQL Default Port
+pg_port: 5432
+
+# Postgresql Account
+pg_user: postgres
+pg_pwd: postgres
+pg_group: postgres
+
+# PG user pg_accounts
+pg_user_account: accuser1
+pg_pwd_account: welcome1
+
+# PG Roles
+pg_createdb: CREATEDB
+pg_superuser: SUPERUSER
+pg_nosuperuser: NOSUPERUSER
+pg_createrole: CREATEROLE
+pg_nocreaterole: NOCREATEROLE
+pg_replication: REPLICATION
+pg_inherit: INHERIT
+pg_login: LOGIN
+
+# PG encoding
+pg_encoding: UTF-8
+pg_collation: en_AU.UTF-8
+pg_ctype: en_AU.UTF-8
+pg_tablespace: pg_default
+
+# PG databases
+pg_db: postgres
+pg_db_test: testdb
+
+# pre requisite application for application_name
+platform_extra_packages:
+  - git
+  - npm
+  - htop
+  - tmux
+  - numpy
+
+python_extra_packages:
+  - python
+  - python-libs
+  - python-pip
+  - python-psycopg2 
