@@ -1,0 +1,19 @@
+# Install Splunk
+#
+- name: Install Splunk
+  hosts: splunk
+  become: yes
+  become_user: root
+  vars_files:
+    - defaults/main.yml
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+
+# Comment out the tasks files you dont require
+# to run
+  - import_tasks: tasks/prereq_apps.yml
+  - import_tasks: tasks/splunk_acc.yml
+  - import_tasks: tasks/splunk.yml
+  - import_tasks: tasks/splunk_forwarder.yml
