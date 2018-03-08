@@ -1,0 +1,24 @@
+# Install nginx on Openstack server
+#
+- name: Install nginx to Openstack
+  hosts: nginx
+  become: yes
+  become_user: root
+  vars_files:
+    - defaults/main.yml
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+    tags: 'add variables and stir well'
+
+# Comment out the yml files you dont require
+# to capture logs from
+  - import_tasks: tasks/prereq_apps.yml
+  - import_tasks: tasks/create_users.yml
+  - import_tasks: tasks/create_dirs.yml
+  - import_tasks: tasks/main.yml
+  - import_tasks: tests/webpage1.yml
+
+  handlers:
+    - import_tasks: handlers/main.yml
