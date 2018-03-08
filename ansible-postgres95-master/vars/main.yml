@@ -1,0 +1,63 @@
+# PostgreSQL Server variables
+# Source locations
+src_location: /github/App-automation/installers
+
+# Postgresql Locations
+# /data/pgsql/data $PGDATA set in postgresql.conf
+pg_home_dir: /data
+pg_tmp: /tmp
+pg_src_dir: '{{ src_location }}/PostgreSQL_install_files'
+
+# Oracle JDK Version
+ora_jdk_ver: 8
+ora_jdk_update: 144
+ora_jdk_bu_num: b14
+ora_jdk_rpm_dn_fn: 'jdk-{{ ora_jdk_ver }}u{{ ora_jdk_update }}-linux-x64.rpm'
+ora_java8_rpm: jdk-8u131-linux-x64.rpm
+
+# PostgreSQL versions
+pg_jdbc_ver: 9.4-1201
+pg_ver4: 9.5.4
+pg_ver5: 9.5.5
+pg_ver6: 9.5.6
+pg_pck_ver1: 1PGDG
+pg_pck_ver2: 2PGDG
+pg_rhel_ver: rhel7.x86_64
+
+pg_jdbc: postgresql-{{ pg_jdbc_ver }}-jdbc41.jar
+
+# PostgreSQL Default Port
+pg_port: 5432
+
+# Postgresql packages
+pg_server95: postgresql95-server-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+pg_devel95: postgresql95-devel-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+pg_libs95: postgresql95-libs-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+pg_contrib95: postgresql95-contrib-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+pg_noarch95: pgdg-redhat95-9.5-3-noarch.rpm
+pg_postgres95: postgresql95-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+pg_plPy95: postgresql95-plpython-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+
+# Nexus Repository URL
+nexus_url: https://swlibrary.<domain>/nexus/service/local/repositories/thirdparty/content/com
+#
+# pgdg-redhat95/9.5/pgdg-redhat95-9.5-3-noarch.rpm
+pg_noarch_url: '{{ nexus_url }}/postgresql/pgdg-redhat95/9.5-3/{{ pg_noarch95 }}'
+#
+# postgresql95/9.5.6/postgresql95-9.5.6-1PGDG.rhel7.x86_64.rpm
+pg_postgres_url: '{{ nexus_url }}/postgresql/postgresql95/{{ pg_ver6 }}/postgresql95-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-libs/9.5.6/postgresql95-libs-9.5.6-1PGDG.rhel7.x86_64.rpm
+pg_libs_url: '{{ nexus_url }}/postgresql/postgresql95-libs/{{ pg_ver6 }}/postgresql95-libs-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-contrib/9.5.6/postgresql95-contrib-9.5.6-1PGDG.rhel7.x86_64.rpm
+pg_contrib_url: '{{ nexus_url }}/postgresql/postgresql95-contrib/{{ pg_ver6 }}/postgresql95-contrib-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-server/9.5.6/postgresql95-server-9.5.6-1PGDG.rhel7.x86_64.rpm
+pg_server_url: '{{ nexus_url }}/postgresql/postgresql95-server/{{ pg_ver6 }}/postgresql95-server-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-plpython/9.5.6/postgresql95-plpython-9.5.6-1PGDG.rhel7.x86_64.rpm
+pg_plpython_url: '{{ nexus_url }}/postgresql/postgresql95-plpython/{{ pg_ver6 }}/postgresql95-plpython-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+
+# Oracle JDK rpm
+ora_jdk_url: '{{ nexus_url }}/oracle/jdk/{{ora_jdk_ver}}u{{ora_jdk_update}}/jdk-{{ora_jdk_ver}}u{{ora_jdk_update}}-linux-x64.rpm'
