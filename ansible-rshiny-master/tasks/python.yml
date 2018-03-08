@@ -1,0 +1,37 @@
+# Python installations 27 & 34
+- name: Install Pyhton27
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - '{{ python_libs }}'
+  tags:
+    - 'Install py libs'
+
+# Miniconda 3
+- name: Download Miniconda {{ miconda3_ver }}
+  get_url:
+    url: '{{ miniconda_url }}/Miniconda3-latest-Linux-x86_64.sh'
+    dest: '{{ cloud_user_dir }}/tmp/'
+#  environment: '{{proxy_env}}'
+  tags:
+    - 'download minconda'
+
+- name: Make Minicond3 executable
+  file:
+    path: '{{ cloud_user_dir }}/tmp/Miniconda3-latest-Linux-x86_64.sh'
+    mode: 0755
+  tags:
+    - 'make exec miniconda'
+
+- name: Silent Install Miniconda {{ miconda3_ver }}
+  command: sh {{ cloud_user_dir }}/tmp/Miniconda3-latest-Linux-x86_64.sh -b -p {{ miniconda_dir }}
+  tags:
+    - 'install miniconda'
+
+- name: Export Miniconda Path
+  shell: source {{ miniconda_dir }}/bin/activate
+  args:
+    executable: /bin/sh
+  tags:
+    - 'export miniconda path'
