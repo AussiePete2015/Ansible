@@ -1,0 +1,30 @@
+# setting the global variables
+#
+# pre required applications
+prereq_apps:
+  - libcurl-devel
+  - curl-devel
+  - openssl-devel
+  - libxml2-devel
+  - postgresql-devel
+  - pandoc
+  - git
+  - npm
+  - htop
+  - tmux
+  - numpy
+
+# python libraries
+python_libs:
+  - python27
+  - python34
+  - python2-tools
+  - python34-tools
+  - python34-setuptools
+  - python-pip
+  - python34-pip
+
+# R core libraries
+r_libs:
+  - R-core
+  - R-devel    
