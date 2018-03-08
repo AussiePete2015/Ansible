@@ -1,0 +1,9 @@
+# install curl-devel openssl-devel libxml2-devel postgresql-devel pandoc git
+- name: Install pre-requisite libraries & Apps
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - '{{ prereq_apps }}'
+  tags:
+    - 'pre-req apps'
