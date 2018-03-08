@@ -18,7 +18,7 @@
   - import_tasks: tasks/create_users.yml
   - import_tasks: tasks/create_dirs.yml
   - import_tasks: tasks/main.yml
-  - import_tasks: tests/webtests.yml
+  - import_tasks: tests/webtest.yml
 
   handlers:
     - import_tasks: handlers/main.yml
