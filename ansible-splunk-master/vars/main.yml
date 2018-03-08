@@ -1,0 +1,11 @@
+# Splunk default variables
+
+splunk_ver: 7.0.2
+splunk_bin: 03bbabbd5c0f
+splunk_platform: linux-2.6-x86_64
+
+splunk_package: splunk-{{ splunk_ver }}-{{ splunk_bin }}-{{ splunk_platform }}.rpm
+splunk_md5: splunk-{{ splunk_ver }}-{{ splunk_bin }}-{{ splunk_platform }}.rpm.md5
+
+splunkfwd_package: splunkforwarder-{{ splunk_ver }}-{{ splunk_bin }}-{{ splunk_platform }}.rpm
+splunkfwd_md5: splunkforwarder-{{ splunk_ver }}-{{ splunk_bin }}-{{ splunk_platform }}.rpm.md5
