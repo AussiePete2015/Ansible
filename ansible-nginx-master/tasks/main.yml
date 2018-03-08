@@ -1,0 +1,75 @@
+# Install Nginx
+
+- name: Install nginx web server
+  yum:
+    name: nginx
+  tags: 'install nginx'
+
+- name: Copy nginx conf file
+  template:
+    src: nginx.conf.j2
+    dest: '{{ nginx_dir }}/nginx.conf'
+  tags: 'copy nginx.conf'
+
+- name: Copy nginx .htpasswd file
+  template:
+    src: .htpasswd.j2
+    dest: '{{ nginx_dir }}/.htpasswd'
+    mode: 0755
+  tags: 'copy .htpasswd'
+
+- name: Copy index html file
+  template:
+    src: index.html.j2
+    dest: '{{ www_dir }}/test1/index.html'
+    owner: '{{ test1_user }}'
+    group: '{{ test1_group }}'
+    mode: 0755
+  tags: 'copy index.html into test1 dir'
+
+- name: Copy index html file
+  template:
+    src: index.html.j2
+    dest: '{{ www_dir }}/test2/index.html'
+    owner: '{{ test2_user }}'
+    group: '{{ test2_group }}'
+    mode: 0755
+  tags: 'copy index.html into test2 dir'
+
+- name: Copy index html file
+  template:
+    src: index.html.j2
+    dest: '{{ www_dir }}/test3/index.html'
+    owner: '{{ test3_user }}'
+    group: '{{ test3_group }}'
+    mode: 0755
+  tags: 'copy index.html into test3 dir'
+
+- name: Copy index html file
+  template:
+    src: index.html.j2
+    dest: '{{ www_dir }}/geo/maps/index.html'
+    mode: 0755
+  tags: 'copy index.html itno geo maps dir'
+
+- name: Copy index html file
+  template:
+    src: index.html.j2
+    dest: '{{ www_dir }}/bisystems/index.html'
+    mode: 0755
+  tags: 'copy index.html into bisystemsdir'
+
+- name: Reload Configuration
+  service:
+    name: nginx
+    state: reloaded
+  tags: 'reload nginx conf'
+
+- name: Start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  tags: 'restart nginx'
+
+# Setting up default sites config
