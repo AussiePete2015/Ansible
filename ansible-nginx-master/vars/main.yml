@@ -1,0 +1,18 @@
+# vars file for nginx
+# Directory locations
+nginx_dir: /etc/nginx
+www_dir: /data/www
+img_dir: /images
+script_dir: /scripts
+media_dir: /media
+
+# Test Users
+test1_user: test1user
+test2_user: test2user
+test3_user: test3user
+test_pwd: test123
+
+# Test Groups
+test1_group: test1group
+test2_group: test2group
+test3_group: test3group
