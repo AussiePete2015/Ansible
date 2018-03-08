@@ -1,0 +1,23 @@
+# This installs a specific version of PostgreSQL using packages
+# from Nexus artifactory.
+# PostgreSQL 9.5.4
+---
+- name: Install PostgreSQL
+  hosts: postgres95
+  become: yes
+  become_user: root
+  vars_files:
+    - defaults/main.yml
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+
+# Comment out the tasks files you dont require
+# to run
+  - import_tasks: tasks/prereq_apps.yml
+  - import_tasks: tasks/pg_main.yml
+  - import_tasks: tasks/pg_db_accounts.yml
+
+#  handlers:
+#    - import_tasks: handlers/main.yml
