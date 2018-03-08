@@ -1,0 +1,15 @@
+---
+- name: Copy logs to remote server
+  hosts: nginx
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+
+# Comment out the talend yml files you dont require
+# to capture logs from
+  - import_tasks: tasks/prereq_apps.yml
+  - import_tasks: tasks/rserver.yml
+  - import_tasks: tasks/python.yml
