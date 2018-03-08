@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Peter Birksmith
+  company: 
+  license: BSD
+  min_ansible_version: 2.0
+  platform:
+    - name: REL
+      versions:
+        - 6
+        - 7
+    - name: Fedora
+      versions:
+        - 24
+        - 25
+        - 26
+        - 27
+    - name: Ubuntu
+      versions:
+        - "Trusty Tahr"
+        - "Xenial Xerus"
+  categories:
+    - web
+dependencies: []
