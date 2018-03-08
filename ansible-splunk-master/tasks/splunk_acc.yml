@@ -1,0 +1,42 @@
+# Create splunk group and accounts
+- group:
+    name: '{{ splunk_grp }}'
+    state: present
+    system: yes
+  tags:
+    - [groups]
+
+- user:
+    name: '{{ splunk_usr }}'
+    password: '{{ splunk_pwd }}'
+    group: '{{ splunk_grp }}'
+    state: present
+  tags:
+    - [users]
+
+- user:
+    name: '{{ splunk_admin }}'
+    password: '{{ splunk_pwd }}'
+    groups: wheels,{{ splunk_grp }}
+    state: present
+  tags:
+    - [users]
+
+- file:
+    path: /tmp/{{ item }}
+    owner: '{{ splunk_usr }}'
+    group: '{{ splunk_grp }}'
+    mode: 0744
+  with_items:
+    - {{ splunk_package }}
+    - {{ splunkfwd_package }}
+  tags:
+    - [chmod]
+
+- file:
+    path: '{{ splunk_home }}'
+    owner: '{{ splunk_usr }}'
+    group: '{{ splunk_grp }}'
+    mode: 0755
+  tags:
+    - [chmod]
