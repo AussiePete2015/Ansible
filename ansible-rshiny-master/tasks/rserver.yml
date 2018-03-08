@@ -1,0 +1,108 @@
+# Create ~/.Renviron template
+- name: Create .Renviron template
+  copy:
+    content: '{{ ml_renviron }}'
+    dest: ~/.Renviron
+    force: yes
+    mode: 0555
+  tags:
+    'Renviron'
+
+# Create accounts and group for Shiny Apps
+- name: Create Shiny-app group and user
+  group:
+    name: '{{ shiny_group }}'
+    state: present
+  tags:
+    - 'Create R group'
+
+- name: Create R users
+  user:
+    name: '{{ shiny_user }}'
+    password: '{{ shiny_pwd }}'
+    groups: '{{ shiny_group }},wheel'
+    state: present
+    append: yes
+  tags:
+    - 'Create R user'
+
+# Create Required directories
+- name: create tmp dir
+  file:
+    path: '{{ cloud_user_dir }}/tmp'
+    state: directory
+    mode: 0755
+    owner: '{{ cloud_user }}'
+    group: '{{ cloud_user }}'
+  tags:
+    - 'Create tmp dir'
+
+- name: create data dir
+  file:
+    path: /data
+    state: directory
+    mode: 0755
+    owner: '{{ cloud_user }}'
+    group: '{{ cloud_user }}'
+  tags:
+    - 'Create data dir'
+
+- name: create data/logs dir
+  file:
+    path: /data/logs
+    state: directory
+    mode: 0755
+    owner: '{{ cloud_user }}'
+    group: '{{ cloud_user }}'
+  tags:
+    - 'Create logs dir'
+
+# R & Rstudio installation and shiny package
+- name: Install R {{ rbase_ver }}
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    '{{ r_libs }}'
+  tags:
+    - 'Install R'
+
+- name: Install R package Shiny
+  command: su - -c "R -e \"install.packages(c('shiny','rmarkdown'), repos='http://cran.rstudio.com/')\""
+  tags:
+    - 'Install Shiny'
+
+- name: Download Shiny Server {{ shiny_ver }}
+  get_url:
+    url: '{{ rshiny_url }}/centos5.9/x86_64/shiny-server-{{ shiny_ver }}-rh5-x86_64.rpm'
+    dest: '{{ cloud_user_dir }}/tmp/'
+#  environment: '{{proxy_env}}'
+  tags:
+    - 'Download Shiny'
+
+- name: Install Shiny Server {{ shiny_ver }}
+  yum:
+    name: '{{ cloud_user_dir }}/tmp/shiny-server-{{ shiny_ver }}-rh5-x86_64.rpm'
+    state: present
+  tags:
+    - 'Install Shiny'
+
+- name: Download R Server {{rs_ver}}
+  get_url:
+    url: '{{ rserver_url }}/rstudio-server-rhel-{{ rs_ver }}.rpm'
+    dest: '{{ cloud_user_dir }}/tmp/'
+#  environment: '{{proxy_env}}'
+  tags:
+    - 'Download R Server'
+
+- name: Install R Server {{rs_ver}}
+  yum:
+    name: '{{ cloud_user_dir }}/tmp/rstudio-server-rhel-{{ rs_ver }}.rpm'
+    state: present
+  tags:
+    - 'Install R server'
+
+- name: Verify RStudio Installation
+  command: rstudio-server verify-installation
+  tags:
+    - "verify install"
