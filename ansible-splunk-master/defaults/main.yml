@@ -1,0 +1,20 @@
+# Default variables
+splunk_url: https://www.splunk.com/bin/splunk
+
+splunk_usr: splunk
+splunk_pwd: splunk #need to encrypt
+
+splunk_grp: splunk
+
+splunk_admin: splunk_service
+
+splunk_home: /opt/splunk
+
+python_extra_packages:
+  - gcc
+  - top
+  - python
+  - python-setuptools
+  - python-devel
+  - python-pip
+  - python-psycopg2
