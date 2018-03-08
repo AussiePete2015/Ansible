@@ -1,0 +1,27 @@
+# basic testing for Splunk installations
+# Checksum using md5
+- copy:
+    src: /files/{{ splunk_md5 }}
+    dest: /tmp/{{ splunk_md5 }}
+
+- set_fact:
+    md5_value: '{{ lookup('file', '/tmp/{{ splunk_md5 }}')}}'
+
+- get_url:
+    url: {{ splunk_url }}/DownloadActivityServlet?architecture=x86_64&platform=linux&version=7.0.2&product=splunk&filename={{ splunk_package }}
+    dest: /tmp/{{ splunk_package }}
+    checksum: 'md5:{{ md5_value }}'
+    force: true
+
+- copy:
+    src: /files/{{ splunkfwd_md5 }}
+    dest: /tmp/{{ splunkfwd_md5 }}
+
+- set_fact:
+    md5_value: '{{ lookup('file', '/tmp/{{ splunkfwd_md5 }}')}}'
+
+- get_url:
+    url: {{ splunk_url }}/DownloadActivityServlet?architecture=x86_64&platform=linux&version=7.0.2&product=universalforwarder&filename={{ splunkfwd_package }}
+    dest: /tmp/{{ splunkfwd_package }}
+    checksum: 'md5:{{ md5_value }}'
+    force: true
