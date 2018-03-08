@@ -1,0 +1,43 @@
+# Create Nginx Users
+#
+- name: Create test1 group
+  group:
+    name: '{{ test1_group }}'
+  tags: 'create test1 group'
+
+- name: Create test2 group
+  group:
+    name: '{{ test2_group }}'
+  tags: 'create test2 group'
+
+- name: Create test3 group
+  group:
+    name: '{{ test3_group }}'
+  tags: 'create test3 group'
+
+- name: create test1 user
+  user:
+    name: '{{ test1_user }}'
+    password: '{{ test_pwd }}'
+    group: '{{ test1_group }}'
+    groups: '{{ test1_group }},{{ test2_group }},wheel'
+    append: yes
+  tags: 'create user test1'
+
+- name: create test2 user
+  user:
+    name: '{{ test2_user }}'
+    password: '{{ test_pwd }}'
+    group: '{{ test2_group }}'
+    groups: '{{ test2_group }},wheel'
+    append: yes
+  tags: 'create user test2'
+
+- name: create test3 user
+  user:
+    name: '{{ test3_user }}'
+    password: '{{ test_pwd }}'
+    group: '{{ test2_group }}'
+    groups: '{{ test3_group }},wheel'
+    append: yes
+  tags: 'create user test3'
