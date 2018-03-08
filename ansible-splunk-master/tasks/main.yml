@@ -1,0 +1,14 @@
+- name: Install Java8
+  yum:
+    name: java
+    state: present
+  tags:
+    - [java]
+
+- name: Install Apps
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items: '{{ python_extra_packages }}'
+  tags:
+    - [extension apps]
