@@ -1,0 +1,36 @@
+# Logshipping variables
+# MDM Log Path
+dropzone: '/Users/dataops/Downloads/'
+
+bonita_log_path: '/data/talend/talendmdm/bonita/logs'
+mdm_log_path: '/data/talend/talendmdm/mdm/logs'
+mdm_apache_log_path: '/data/talend/talendmdm/mdm/apache-tomcat/logs'
+
+# TAC Log Path
+tac_log_path: '/opt/talend/talendadmin/tac/taclogs'
+tac_apache_log_path: '/opt/talend/talendadmin/tac/apache-tomcat/logs'
+
+# JS & ESB Log Path
+# ESB
+esb_log_path: '/data/talend/talendesb/container/log'
+
+# JobExecution Log Path
+# Note* This directory has timestamped folders that all need to be collected
+jobexe_log_path: '/data/talend/talendesb/jobexecutions/logs'
+
+# JS Log Path
+js_log_path: '/data/talend/talendjs/jobserver/agent'
+
+# Log files
+talend_mdm_log: 'talend_mdm.tar.gz'
+talend_tac_log: 'talend_tac.tar.gz'
+talend_js_log: 'talend_js.tar.gz'
+talend_esb_log: 'talend_esb.tar.gz'
+
+# Service Names
+mdm_service: mdm
+bonita_service: bonita
+tac_service: tac
+cmdline_service: cmdline
+js_service: jobserver
+esb_service: TALEND-ESB-CONTAINER-service
