@@ -1,0 +1,34 @@
+# Stop and start talend bonita & MDM services
+
+- name: restart bonita
+  service:
+    name: '{{ bonita_service }}'
+    state: started
+
+- pause:
+    minutes: 5
+
+- name: restart mdm
+  service:
+    name: '{{ mdm_service }}'
+    state: restarted
+
+- name: restart tac
+  service:
+    name: '{{ tac_service }}'
+    state: restarted
+
+- name: restart cmdline
+  service:
+    name: '{{ cmdline_service }}'
+    state: restarted
+
+- name: restart jobservers
+  service:
+    name: '{{ js_service }}'
+    state: restarted
+
+- name: restart esb
+  service:
+    name: '{{ esb_service }}'
+    state: restarted
