@@ -1,0 +1,18 @@
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+#
+- name: Install ASCI ActiveBatch Automation Agent
+  hosts: asci_prod
+  become: yes
+  become_user: root
+  vars_files:
+   - defaults/main.yml
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+
+# Comment out the tasks files you dont require
+# to run
+  - import_tasks: tasks/configure.yml
+  - import_tasks: tasks/main.yml
