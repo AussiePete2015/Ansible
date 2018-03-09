@@ -1,0 +1,135 @@
+- name: Configure Postgresql tb Dev
+  hosts: pg_db_dev, pg_db_prod
+  become: yes
+#  gather_facts: no 
+
+  vars:
+     pg_tmp: /tmp
+
+     pg_user: postgres
+     pg_pwd: #######
+     pg_group: postgres
+
+     proxy_user: pxy_account
+     proxy_pwd: ########
+     proxy_env: 
+        http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+        https://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+
+     pg_tb_acc1: bill
+     pg_tb_pwd1: ########
+     pg_tb_acc2: bob
+     pg_tb_pwd2: ########
+    
+     pg_createdb: CREATEDB
+     pg_superuser: SUPERUSER
+     pg_nosuperuser: NOSUPERUSER
+     pg_createrole: CREATEROLE
+     pg_nocreaterole: NOCREATEROLE
+     pg_replication: REPLICATION
+     pg_inherit: INHERIT
+     pg_login: LOGIN
+
+     pg_encoding: UTF-8
+     pg_collation: en_AU.UTF-8
+     pg_ctype: en_AU.UTF-8
+     pg_tablespace: pg_default
+
+     pg_db_tbWork: tbWork
+     pg_db_stat_activity: tb_stat_activity
+     
+#
+# Nexus Repository URL
+     nexus_url: ../nexus/service/local/repositories/thirdparty/content/com
+# Tb pg stat_activity restore tar     
+     tb_restore_url: '{{ nexus_url }}/tbdbs/pg_tables/9.5.4/pg_tables.tar'
+
+  tasks:
+# Create a new database with specific encoding and locale
+# settings. If a template different from "template0" is specified, encoding
+# and locale settings must match those of the template.
+# DBs
+#
+   - name: Install Pyhton27
+     yum:
+        name: '{{ item }}'
+        state: present 
+     with_items:
+     - python27
+     - python34
+     - python2-tools 
+     - python34-tools
+     - python34-setuptools
+     - python-pip
+     - python34-pip
+
+   - name: Upgrade pip
+     command: pip --proxy https://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080 install -U pip
+
+   - name: psycopg2
+     command: pip --proxy https://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080 install -U psycopg2
+
+   - name: Download tbdb Restore file
+     get_url: 
+        url: '{{ talend_restore_url }}'
+        dest: '{{ pg_tmp }}/pg_tables.tar'
+        mode: 0755 
+        owner: '{{pg_user}}'
+        group: '{{pg_user}}'
+
+   - name: Configure pg_hba.conf
+     template:
+        src: pg_hba.conf.j2
+        dest: '/data/pgsql/data/pg_hba.conf'
+        owner: '{{ pg_user }}'
+        group: '{{ pg_group }}'
+
+   - name: Restore SQL from PostgreSQL
+     template:
+        src: pg_createtb.sql.j2
+        dest: '/tmp/pg_createtb.sql'
+        owner: '{{ pg_user }}'
+        group: '{{ pg_group }}'
+
+   - name: stop postgresql-9.5.service
+     shell: systemctl stop postgresql-9.5.service
+
+   - name: start postgresql-9.5.service
+     shell: systemctl start postgresql-9.5.service
+
+   - postgresql_db:
+        login_password: '{{ pg_pwd }}'
+        name: '{{ pg_db_tbWork }}'
+        encoding: '{{ pg_encoding }}'
+        lc_collate: '{{ pg_collation }}'
+        lc_ctype: '{{ pg_ctype }}'
+     when: "'pg_db_dev' in group_names"
+
+   - postgresql_user:
+        login_password: '{{ pg_pwd }}'
+        db: '{{ pg_db_tbWork }}'
+        name: '{{ pg_tb_acc1 }}'
+        password: '{{ pg_tb_pwd1 }}'
+        priv: ALL
+        role_attr_flags: '{{ pg_login }},{{ pg_createdb }},{{ pg_superuser }},{{ pg_createrole }},{{ pg_replication }}'
+     when: "'pg_db_dev' in group_names"
+
+   - name: Create tbstat table on {{ pg_db_stat_activity }}
+     shell: "PGPASSWORD={{ pg_pwd }} psql -U {{ pg_user }} -d {{ pg_db_stat_activity }} -c 'CREATE TABLE public.tbstat (<sql to create table goes here>) WITH (OIDS = FALSE) TABLESPACE pg_default;'"
+
+   - name: Owner to Postgres
+     shell: "PGPASSWORD={{ pg_pwd }} psql -U {{ pg_user }} -d {{ pg_db_stat_activity }} -c 'ALTER TABLE public.tbstat OWNER to postgres;'"
+
+   - name: Grant ALL on Table tbstat
+     shell: "PGPASSWORD={{ pg_pwd }} psql -U {{ pg_user }} -d {{ pg_db_stat_activity }} -c 'GRANT ALL ON TABLE public.tbstat TO postgres;'"
+
+
+# Create tb user and grant access to database
+# PostgreSQL
+   - postgresql_user:
+        login_password: '{{ pg_pwd }}'
+        db: '{{ pg_db_tbWork }}'
+        name: '{{ pg_tb_acc2 }}'
+        password: '{{ pg_tb_pwd2 }}'
+        role_attr_flags: '{{ pg_login }},{{ pg_nosuperuser }},{{ pg_inherit }},{{ pg_createdb }},{{ pg_nocreaterole }},{{ pg_replication }}'
+     when: "'pg_db_dev' in group_names"
