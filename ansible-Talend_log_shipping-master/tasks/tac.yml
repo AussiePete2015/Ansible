@@ -1,0 +1,83 @@
+# Main task of work
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+
+# name: Shutdown tac services
+  - service:
+      name: '{{ tac_service }}'
+      state: stopped
+    tags:
+      - tac
+
+  - service:
+      name: '{{ cmdline_service }}'
+      state: stopped
+    tags:
+      - cmdline
+
+  - name: Test port 8080
+    shell: netstat -tunlp | grep ":8080" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8080'
+
+  - name: Test port 8002
+    shell: netstat -tunlp | grep ":8002" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8002'
+
+# Tar logs in tac & cmdline
+  - archive:
+      path:
+        - '{{ tac_log_path }}'
+        - '{{ tac_apache_log_path }}'
+      dest: /data/{{ talend_tac_log }}
+      format: gz
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_tac_log }}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
+
+# - name: Restart tac services
+  - service:
+      name: '{{ tac_service }}'
+      state: started
+    tags:
+      - tac
+
+# Allow bonita service to complete its startup
+  - pause:
+      minutes: 5
+    tags:
+      - 'delay 5 minutes'
+
+# - name: Restart cmdline services
+  - service:
+      name: '{{ cmdline_service }}'
+      state: started
+    tags:
+      - cmdline
+
+# Test ports
+  - name: Test port 8080
+    shell: netstat -tunlp | grep ":8080" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8080'
+
+  - name: Test port 8002
+    shell: netstat -tunlp | grep ":8002" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8002'
+
+# completed job to capture logs and transfer them to remote location.
