@@ -1,0 +1,69 @@
+
+- name: Copy CA certificates and update
+  hosts: dev
+  become: yes
+
+  vars:
+#     ca_maven_cert: /etc/pki/ca-trust/source/anchors/repo1mavenorg.crt
+     ca_cert: /etc/pki/ca-trust/source/anchors/ca_cert.cer
+     ca_int_cert: /etc/pki/ca-trust/source/anchors/ca_cert_int.cer
+     
+     ssh_vpn_user: ssh-vpn-user
+     ssh_vpn_user_dir: /home/ssh_vpn_user
+     
+     proxy_user: 
+     proxy_pwd: ####
+     
+     proxy_env:
+     http_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+     https_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+
+  tasks:
+#    - name: Copy over CA root certificate to server
+#      copy: src=/home/pbirksmith/Workspace/keys/repo1mavenorg.crt dest={{ ca_cert }} owner=ssh_vpn_user mode=0644
+      
+    - name: Copy over CA certificate
+      copy: 
+        src: /home/pbirksmith/Workspace/keys/ca_cert.cer 
+        dest: '{{ ca_cert }}'
+        owner: ssh_vpn_user
+        mode: 0644
+
+    - name: Copy over CA int certificate
+      copy: 
+        src: /home/pbirksmith/Workspace/keys/ca_cert_int.cer 
+        dest: '{{ ca_int_cert }}' 
+        owner: ssh_vpn_user 
+        mode: 0644
+ 
+    - name: Run update-ca-trust enable
+      raw: update-ca-trust enable
+
+    - name: Run update-ca-trust extract 
+      raw: update-ca-trust extract
+
+    - name: Run update-ca-trust
+      raw: update-ca-trust
+
+    - name: Append Proxy to yum.conf
+      blockinfile: 
+        path: /etc/yum.conf
+        state: present
+        backup: yes
+        block: |
+          proxy=http://<Proxy IP Address>:8080 #Add proxy
+          proxy_username={{ proxy_user }}
+          proxy_password={{ proxy_pwd }}
+    - name: Append Proxy to {{ ssh_vpn_user }}.bash_profile 
+      blockinfile:
+        path: '{{ ssh_vpn_user_dir }}/.bash_profile'
+        state: present
+        backup: yes
+        block: |
+          export http_proxy=http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+          export https_proxy=http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+          export no_proxy=proxy.com
+    - name: Update Profile
+      shell: source {{ ssh_vpn_user_dir }}/.bash_profile
+      args:
+        executable: /bin/sh
