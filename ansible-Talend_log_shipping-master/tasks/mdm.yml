@@ -1,0 +1,85 @@
+# Main task of work
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+
+# name: Shutdown MDM services
+  - service:
+      name: '{{ mdm_service }}'
+      state: stopped
+    tags:
+      - mdm
+
+# name: Shutdown Bonita services
+  - service:
+      name: '{{ bonita_service }}'
+      state: stopped
+    tags:
+      - bonita
+
+  - name: Test port 8180
+    shell: netstat -tunlp | grep ":8180" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8180'
+
+  - name: Test port 8280
+    shell: netstat -tunlp | grep ":8280" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8280'
+
+# Tar logs in Bonita & MDM
+  - archive:
+      path:
+        - '{{ bonita_log_path }}'
+        - '{{ mdm_log_path }}'
+        - '{{ mdm_apache_log_path }}'
+      dest: /data/{{ talend_mdm_log }}
+      format: gz
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_mdm_log }}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
+
+# - name: Restart Bonita services
+  - service:
+      name: '{{ bonita_service }}'
+      state: started
+    tags:
+      - bonita
+
+# Allow bonita service to complete its startup
+  - pause:
+      minutes: 5
+    tags:
+      - 'delay 5 minutes'
+
+# - name: Restart MDM services
+  - service:
+      name: '{{ mdm_service }}'
+      state: started
+    tags:
+      - mdm
+
+# Test ports
+  - name: Test port 8180
+    shell: netstat -tunlp | grep ":8180" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8180'
+
+  - name: Test port 8280
+    shell: netstat -tunlp | grep ":8280" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8280'
+
+# completed job to capture logs and transfer them to remote location.
