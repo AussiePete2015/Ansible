@@ -1,0 +1,188 @@
+- name: Install R Server on Pre Prod
+  hosts: rstudio
+  become: yes
+
+  vars:
+     epel_ver: 7.noarch
+     rbase_ver: 3.3.3
+     rs_ver: 1.0.143-x86_64
+     shiny_ver: 1.5.3.838
+     py2_ver: 2.7.5
+     py3_ver: 3.4.2
+     miconda3_ver: 4.3.14
+     
+     ssh_vpn_user: <ssh_vpn_user>
+     ssh_vpn_user_dir: <ssh_vpn_user_dir>
+     shiny_user: shiny
+     shiny_group: shiny_apps
+     shiny_pwd: #######     
+
+     proxy_user: pxy_user
+     proxy_pwd: #######
+     
+     proxy_env:
+       http_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+       https_proxy: http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+     ml_renviron: |
+        # DB_USER = "sXXXXXX"
+        # DB_PROD_PASSWORD = "YYYYYYYYYYYY"
+        # DB_NONPROD_PASSWORD = "ZZZZZZZZZZZ"
+        http_proxy=http://proxy.com:8080
+        http_proxy_user={{ proxy_user }}:{{ proxy_pwd }}
+        https_proxy=https://proxy.com:8080
+        https_proxy_user={{ proxy_user }}:{{ proxy_pwd }}
+     
+     cloud_user_dir: /home/ssh_vpn_user
+     miniconda_dir: /opt/miniconda
+
+     rserver_url: https://download2.rstudio.org
+     rshiny_url: https://download3.rstudio.org
+     miniconda_url: https://repo.continuum.io/miniconda
+
+  tasks:
+
+   - name: Append Proxy to yum.conf
+     blockinfile: 
+       path: /etc/yum.conf
+       state: present
+       backup: yes
+       block: |
+         proxy=http://<ip address of proxy>:8080 #Add IP address of your proxy
+         proxy_username={{ proxy_user }}
+         proxy_password={{ proxy_pwd }}
+   - name: Append Proxy to {{ ssh_vpn_user }}.bash_profile 
+     blockinfile:
+       path: '{{ ssh_vpn_user_dir }}/.bash_profile'
+       state: present
+       backup: yes
+       block: |
+         export http_proxy=http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+         export https_proxy=http://{{ proxy_user }}:{{ proxy_pwd }}@proxy.com:8080
+         export no_proxy=proxy.com
+   - name: Update Profile
+     shell: source {{ ssh_vpn_user_dir }}/.bash_profile
+     args:
+       executable: /bin/sh
+
+# Create ~/.Renviron template
+   - name: Create .Renviron template
+     copy:
+       content: '{{ ml_renviron }}'
+       dest: ~/.Renviron
+       force: yes
+       mode: 0555  
+
+# Create Required directories
+   - name: create tmp dir
+     file: 
+       path: '{{ ssh_vpn_user_dir }}/tmp'
+       state: directory 
+       mode: 0755 
+       owner: '{{ ssh_vpn_user }}'
+       group: '{{ ssh_vpn_user }}'
+
+   - name: create data dir
+     file: 
+       path: /data 
+       state: directory 
+       mode: 0755 
+       owner: '{{ ssh_vpn_user }}'
+       group: '{{ ssh_vpn_user }}'
+
+   - name: create data/logs dir
+     file: 
+       path: /data/logs 
+       state: directory 
+       mode: 0755 
+       owner: '{{ ssh_vpn_user }}'
+       group: '{{ ssh_vpn_user }}'
+
+# install curl-devel openssl-devel libxml2-devel postgresql-devel pandoc git
+   - name: Install pre-requisite libraries & Apps
+     yum:
+       name: '{{ item }}'
+       state: latest
+     with_items:
+     - libcurl-devel
+     - curl-devel 
+     - openssl-devel 
+     - libxml2-devel 
+     - postgresql-devel 
+     - pandoc
+     - git
+     - npm
+     - htop
+     - tmux
+     - numpy
+
+# R & Rstudio installation and shiny package
+   - name: Install R {{ rbase_ver }}
+     yum:
+       name: '{{ item }}'
+       state: latest
+     with_items:
+     - R-core
+     - R-devel
+
+   - name: Install R package Shiny
+     command: su - -c "R -e \"install.packages(c('shiny','rmarkdown'), repos='http://cran.rstudio.com/')\""
+     
+   - name: Download Shiny Server {{ shiny_ver }}
+     get_url:
+       url: '{{ rshiny_url }}/centos5.9/x86_64/shiny-server-{{ shiny_ver }}-rh5-x86_64.rpm'
+       dest: '{{ ssh_vpn_user_dir }}/tmp/'
+     environment: '{{ proxy_env }}'
+
+   - name: Install Shiny Server {{ shiny_ver }}
+     yum:
+       name: '{{ ssh_vpn_user_dir }}/tmp/shiny-server-{{ shiny_ver }}-rh5-x86_64.rpm'
+       state: present  
+
+   - name: Download R Server {{ rs_ver }}
+     get_url:
+       url: '{{ rserver_url }}/rstudio-server-rhel-{{ rs_ver }}.rpm'
+       dest: '{{ ssh_vpn_user_dir }}/tmp/'
+     environment: '{{ proxy_env }}'
+
+   - name: Install R Server {{ rs_ver }}
+     yum:
+       name: '{{ ssh_vpn_user_dir }}/tmp/rstudio-server-rhel-{{ rs_ver }}.rpm'
+       state: present
+
+   - name: Verify RStudio Installation
+     command: rstudio-server verify-installation
+
+# Python installations 27 & 34
+
+   - name: Install Pyhton27
+     yum:
+        name: '{{ item }}'
+        state: present 
+     with_items:
+     - python27
+     - python34
+     - python2-tools 
+     - python34-tools
+     - python34-setuptools
+     - python-pip
+     - python34-pip
+
+# Miniconda 3
+   - name: Download Miniconda {{ miconda3_ver }}
+     get_url:
+        url: '{{ miniconda_url }}/Miniconda3-latest-Linux-x86_64.sh'
+        dest: '{{ ssh_vpn_user_dir }}/tmp/'
+     environment: '{{ proxy_env }}'
+
+   - name: Make Minicond3 executable
+     file: 
+       path: '{{ ssh_vpn_user_dir }}/tmp/Miniconda3-latest-Linux-x86_64.sh'
+       mode: 0755
+
+   - name: Silent Install Miniconda {{ miconda3_ver }}
+     command: sh {{ ssh_vpn_user_dir }}/tmp/Miniconda3-latest-Linux-x86_64.sh -b -p {{ miniconda_dir }}
+     
+   - name: Export Miniconda Path
+     shell: source {{ miniconda_dir }}/bin/activate
+     args:
+       executable: /bin/sh 
