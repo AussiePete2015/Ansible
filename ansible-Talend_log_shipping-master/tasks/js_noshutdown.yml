@@ -1,0 +1,21 @@
+# No Shutdown for jobserver
+#
+# Tar logs in jobserver
+  - archive:
+      path:
+        - '{{ js_log_path }}'
+      dest: /data/{{ talend_js_log}}
+      mode: 0777
+      format: gz
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_js_log}}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
