@@ -1,0 +1,12 @@
+# AbatEmgr.Conf
+- name: Configure ASCI configuration
+  template:
+    src: AbatEmgr.Conf.j2
+    dest: '{{ abatagent_dir }}{{ activebatchv11_dir }}/AbatEmgr.Conf'
+
+- name: Run AB11 configuration
+  command: ./abatstartup -g -f {{ abatagent_dir }}{{ activebatchv11_dir }}/AbatEmgr.Conf
+  args:
+    chdir: '{{ abatagent_dir }}{{ activebatchv11_dir }}/ActiveBatchV11/bin/'
+  become: yes
+  become_user: root
