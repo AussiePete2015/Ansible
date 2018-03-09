@@ -1,0 +1,38 @@
+# Install pre-requisite applications for PostgreSQL pg_server95
+#
+#
+- name: Download Oracle JDK
+  get_url:
+    url: '{{ ora_jdk_url }}'
+    dest: '{{ pg_tmp }}/{{ ora_jdk_rpm_dn_fn }}'
+  tags:
+    - 'download oracle jdk'
+
+# Install Java & Applications
+- name: Install Java8
+  yum:
+    name: '{{ pg_tmp }}/{{ ora_jdk_rpm_dn_fn }}'
+    state: present
+  tags:
+    - 'install java'
+
+# disable pg95 repositories
+# Repo disabled because it is attempting to connect to the internet
+#- name:
+#  yum:
+#    name: pgdg-95-redhat
+#    disablerepo: pgdg-95-redhat
+#    state: present
+#  tags: 'disable pgdg95 repo'
+
+- name: Install Pre Req Apps
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - '{{ platform_extra_packages }}'
+  - '{{ python_extra_packages }}'
+
+#  - python-firewalld
+  tags:
+    - 'install extension apps'
