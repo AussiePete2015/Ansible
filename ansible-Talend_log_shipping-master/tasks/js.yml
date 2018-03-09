@@ -1,0 +1,74 @@
+# Main task of work
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+
+# name: Shutdown jobserver services
+  - service:
+      name: '{{ js_service }}'
+      state: stopped
+    tags:
+      - jobserver
+
+  - name: Test port 8888
+    shell: netstat -tunlp | grep ":8888" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8888'
+
+  - name: Test port 8000
+    shell: netstat -tunlp | grep ":8000" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8000'
+
+  - name: Test port 8001
+    shell: netstat -tunlp | grep ":8001" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8001'
+
+# Tar logs in jobserver
+  - archive:
+      path:
+        - '{{ js_log_path }}'
+      dest: /data/{{ talend_js_log}}
+      format: gz
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_js_log}}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
+
+# - name: Restart jobserver services
+  - service:
+      name: '{{ js_service }}'
+      state: started
+    tags:
+      - jobserver
+
+# Test ports
+  - name: Test port 8888
+    shell: netstat -tunlp | grep ":8888" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8888'
+
+  - name: Test port 8000
+    shell: netstat -tunlp | grep ":8000" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8000'
+
+  - name: Test port 8001
+    shell: netstat -tunlp | grep ":8001" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8001'
+# completed job to capture logs and transfer them to remote location.
