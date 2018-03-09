@@ -1,0 +1,23 @@
+# No shutdown required
+#
+# Tar logs in Bonita & MDM
+  - archive:
+      path:
+        - '{{ bonita_log_path }}'
+        - '{{ mdm_log_path }}'
+        - '{{ mdm_apache_log_path }}'
+      dest: /data/{{ talend_mdm_log }}
+      format: gz
+      mode: 0777
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_mdm_log }}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
