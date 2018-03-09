@@ -1,0 +1,129 @@
+# Main task of work
+# Created by: Peter Birksmith
+# Application owner: Data Quality Team
+
+# name: Shutdown esb services
+  - service:
+      name: '{{ esb_service }}'
+      state: stopped
+    tags:
+      - esb
+
+  - name: Test port 8888
+    shell: netstat -tunlp | grep ":8888" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8888'
+
+  - name: Test port 8000
+    shell: netstat -tunlp | grep ":8000" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8000'
+
+  - name: Test port 8001
+    shell: netstat -tunlp | grep ":8001" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8001'
+
+  - name: Test port 8002
+    shell: netstat -tunlp | grep ":8002" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8002'
+
+  - name: Test port 8040
+    shell: netstat -tunlp | grep ":8040" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 8040'
+
+  - name: Test port 1009
+    shell: netstat -tunlp | grep ":1009" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 1009'
+
+  - name: Test port 44444
+    shell: netstat -tunlp | grep ":44444" | sed -e 's/. *\///'
+    register: results
+    tags:
+      - 'ping 44444'
+
+# Tar logs in esb
+  - archive:
+      path:
+        - '{{ esb_log_path }}'
+      dest: /data/{{ talend_esb_log }}
+      format: gz
+    tags:
+      - Tar
+
+# Transfer compressed file to remote dropzone
+  - fetch:
+      src: /data/{{ talend_esb_log }}
+      dest: '{{ dropzone }}'
+      owner: dataops
+      mode: 0755
+      flat: yes
+    tags:
+      - copy
+
+# - name: Restart Bonita services
+  - service:
+      name: '{{ esb_service }}'
+      state: restarted
+    tags:
+      - esb
+
+# Allow bonita service to complete its startup
+  - pause:
+      minutes: 5
+    tags:
+      - 'delay 5 minutes'
+
+# Test ports
+  - name: Test port 8888
+    shell: netstat -tunlp | grep ":8888" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8888'
+
+  - name: Test port 8000
+    shell: netstat -tunlp | grep ":8000" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8000'
+
+  - name: Test port 8001
+    shell: netstat -tunlp | grep ":8001" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8001'
+
+  - name: Test port 8002
+    shell: netstat -tunlp | grep ":8002" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 8002'
+
+  - name: Test port 8040
+    shell: netstat -tunlp | grep ":8040" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+       - 'ping 8040'
+
+  - name: Test port 1009
+    shell: netstat -tunlp | grep ":1009" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 1009'
+
+  - name: Test port 44444
+    shell: netstat -tunlp | grep ":44444" | sed -e 's/. *\///'
+    register: upstate
+    tags:
+      - 'ping 44444'
+
+# completed job to capture MDM logs and transfer them to remote location.
