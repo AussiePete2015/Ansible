@@ -1,0 +1,238 @@
+# Script to copy and install PostgreSQL servers
+# See hosts file for breakout of servers
+- name: Configure Postgresql Servers
+  hosts: ost-postgresql
+  become: yes
+  become_user: root
+
+  vars:
+     src_location: /home/pbirksmith/Workspace
+     pg_home_dir: /data
+     pg_tmp: /tmp
+     pg_src_dir: "{{ src_location }}/PostgreSQL_install_files"
+
+     ora_jdk_ver: 8
+     ora_jdk_update: 144
+     ora_jdk_bu_num: b14
+     ora_jdk_rpm_dn_fn: "jdk-{{ ora_jdk_ver }}u{{ ora_jdk_update }}-linux-x64.rpm"
+     ora_java8_rpm: jdk-8u131-linux-x64.rpm
+     
+     pg_jdbc_ver: 9.4-1201
+     pg_ver4: 9.5.4
+     pg_ver5: 9.5.5
+     pg_ver6: 9.5.6
+     pg_sql5: pgsql-9.5
+     pg_sql6: pgsql-9.6
+     pg_pck_ver1: 1PGDG
+     pg_pck_ver2: 2PGDG
+     pg_rhel_ver: rhel7.x86_64
+
+     pg_jdbc: postgresql-{{ pg_jdbc_ver }}-jdbc41.jar
+     pg_port: 5432
+
+     pg_server95: postgresql95-server-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+     pg_devel95: postgresql95-devel-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+     pg_libs95: postgresql95-libs-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+     pg_contrib95: postgresql95-contrib-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+     pg_noarch95: pgdg-redhat95-9.5-3-noarch.rpm
+     pg_postgres95: postgresql95-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+     pg_plPy95: postgresql95-plpython-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm
+    
+     pg_user: postgres
+     pg_pwd: ##########
+     pg_group: postgres
+ 
+# Nexus Repository URL
+     nexus_url: ../nexus/service/local/repositories/thirdparty/content/com
+#     
+# pgdg-redhat95/9.5/pgdg-redhat95-9.5-3-noarch.rpm
+     pg_noarch_url: '{{ nexus_url }}/postgresql/pgdg-redhat95/9.5-3/{{ pg_noarch95 }}'
+#
+# postgresql95/9.5.6/postgresql95-9.5.6-1PGDG.rhel7.x86_64.rpm
+     pg_postgres_url: '{{ nexus_url }}/postgresql/postgresql95/{{ pg_ver6 }}/postgresql95-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-libs/9.5.6/postgresql95-libs-9.5.6-1PGDG.rhel7.x86_64.rpm
+     pg_libs_url: '{{ nexus_url }}/postgresql/postgresql95-libs/{{ pg_ver6 }}/postgresql95-libs-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-contrib/9.5.6/postgresql95-contrib-9.5.6-1PGDG.rhel7.x86_64.rpm
+     pg_contrib_url: '{{ nexus_url }}/postgresql/postgresql95-contrib/{{ pg_ver6 }}/postgresql95-contrib-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-server/9.5.6/postgresql95-server-9.5.6-1PGDG.rhel7.x86_64.rpm
+     pg_server_url: '{{ nexus_url }}/postgresql/postgresql95-server/{{ pg_ver6 }}/postgresql95-server-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+#
+# postgresql95-plpython/9.5.6/postgresql95-plpython-9.5.6-1PGDG.rhel7.x86_64.rpm
+     pg_plpython_url: '{{ nexus_url }}/postgresql/postgresql95-plpython/{{ pg_ver6 }}/postgresql95-plpython-{{ pg_ver6 }}-{{ pg_pck_ver1 }}.{{ pg_rhel_ver }}.rpm'
+
+# Oracle JDK rpm
+     ora_jdk_url: '{{ nexus_url }}/oracle/jdk/{{ora_jdk_ver}}u{{ora_jdk_update}}/jdk-{{ora_jdk_ver}}u{{ora_jdk_update}}-linux-x64.rpm'
+  
+  tasks:
+# Use Nexus Repository to install Postgresql
+   - name: Download Postgresql pgdg-redhat95-9.5-3-noarch.rpm
+     get_url: 
+       url: '{{ pg_noarch_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_noarch95 }}'
+
+   - name: Download Postgresql 
+     get_url: 
+       url: '{{ pg_postgres_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_postgres95 }}'
+
+   - name: Download Postgresql libs
+     get_url: 
+       url: '{{ pg_libs_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_libs95 }}'
+
+   - name: Download Postgresql contribs
+     get_url: 
+       url: '{{ pg_contrib_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_contrib95 }}'
+
+   - name: Download Postgresql server
+     get_url: 
+       url: '{{ pg_server_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_server95 }}'
+
+   - name: Download Postgresql plPy95
+     get_url: 
+       url: '{{ pg_plpython_url }}'
+       dest: '{{ pg_tmp }}/{{ pg_plPy95 }}'
+
+   - name: Download Oracle JDK
+     get_url: 
+       url: '{{ ora_jdk_url }}'
+       dest: '{{ pg_tmp }}/{{ ora_jdk_rpm_dn_fn }}'
+
+# Create accounts and home directory
+   - name: Create postgres group and user
+     group: 
+       name: '{{pg_group}}'
+       state: present
+
+   - name: create data directory "/data"
+     file: 
+       path: '{{ pg_home_dir }}' 
+       state: directory 
+       mode: 0755 
+       owner: '{{ pg_user }}'
+       group: '{{ pg_group }}'
+
+   - name: create data directory "/data/pgsql"
+     file: 
+       path: '{{ pg_home_dir }}/pgsql'
+       state: directory 
+       mode: 0755 
+       owner: '{{ pg_user }}'
+       group: '{{ pg_group }}'
+
+   - name: create data directory "/data/pgsql/data"
+     file: 
+       path: '{{ pg_home_dir }}/pgsql/data'
+       state: directory 
+       mode: 0700 
+       owner: '{{ pg_user }}'
+       group: '{{ pg_group }}'
+
+# Install Applications
+   - name: Install Java8
+     yum:
+       name: "{{ pg_tmp }}/{{ ora_jdk_rpm_dn_fn }}"
+       state: present
+
+   - name: Install Apps
+     yum: 
+       name: '{{ item }}'
+       state: latest
+     with_items:
+     - git
+     - npm
+     - htop
+     - tmux
+     - numpy
+
+# Install PostgreSQL Server & components using rpm -ivh
+   - name: Install postgresql components noarch
+     yum: 
+       name: "{{ pg_tmp }}/{{ item }}"
+       state: present
+     with_items:
+     - "{{ pg_noarch95 }}"
+     - "{{ pg_libs95 }}"
+     - "{{ pg_postgres95 }}"
+     - "{{ pg_contrib95 }}"
+     - "{{ pg_plPy95 }}"
+     - "{{ pg_server95 }}"
+
+# Initialize PostgreSQL database
+   - name: Check if PostgreSQL database is initialized
+     stat:
+       path: /data/pgsql/data/PG_VERSION
+     register: pgdata_dir_version
+
+   - name: Initialise pg database
+     become: yes
+     become_user: "{{ pg_user }}"
+     command: "/usr/{{ pg_sql5 }}/bin/initdb -D /data/pgsql/data"
+     when: not pgdata_dir_version.stat.exists
+
+   - name: Create postgres user
+     user: 
+       name: '{{ pg_user }}'
+       password: '{{ pg_pwd }}'
+       groups: '{{ pg_group }},wheel'
+       state: present
+       append: yes
+
+# Start the PostgreSQL database
+   - name: Start PostgreSQL
+     become: yes
+     become_user: "{{ pg_user }}"
+     command: /usr/{{ pg_sql5 }}/bin/pg_ctl -D /data/pgsql/data -l logfile start
+
+# Set the configuration for PostgreSQL
+   - name: Configure postgresql.conf
+     template:
+        src: postgresql.conf.j2
+        dest: "/data/pgsql/data/postgresql.conf"
+        owner: "{{ pg_user }}"
+        group: "{{ pg_group }}"
+
+   - name: Configure pg_hba.conf
+     template:
+        src: pg_hba.conf.j2
+        dest: "/data/pgsql/data/pg_hba.conf"
+        owner: "{{ pg_user }}"
+        group: "{{ pg_group }}"
+
+   - name: Configure pg_accounts.sql
+     template:
+        src: pg_accounts.sql.j2
+        dest: "/tmp/pg_accounts.sql"
+        owner: "{{ pg_user }}"
+        group: "{{ pg_group }}"
+
+   - name: Configure pg_dbtbs.sql
+     template:
+        src: pg_dbtbs.sql.j2
+        dest: "/tmp/pg_dbtbs.sql"
+        owner: "{{ pg_user }}"
+        group: "{{ pg_group }}"
+
+   - name: Configure postgresql-9.5.service
+     template:
+        src: postgresql-9.5.service.j2
+        dest: /etc/systemd/system/postgresql-9.5.service
+        mode: 755
+
+# Start PostgreSQL services
+   - name: reload-systemd
+     shell: systemctl daemon-reload
+
+   - name: stop postgresql-9.5.service
+     shell: systemctl stop postgresql-9.5.service
+
+   - name: enable postgresql-9.5.service
+     shell: systemctl enable postgresql-9.5.service
+
+   - name: start postgresql-9.5.service
+     shell: systemctl start postgresql-9.5.service
