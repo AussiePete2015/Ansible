@@ -1,0 +1,40 @@
+# Configure and install ASCI client agent
+- name: create Asci software directory /opt/ASCI
+  file:
+    path: '{{ abatagent_dir }}'
+    state: directory
+    mode: 0755
+  tags:
+    - 'create_opt_ASCI_dir'
+
+- name: create Asci software directory /opt/ASCI/ActiveBatchV11
+  file:
+    path: '{{ abatagent_dir }}{{ activebatchv11_dir }}'
+    state: directory
+    mode: 0755
+  tags:
+    - 'create activebatchv11_dir'
+
+- name: Download AB11 tar file
+  get_url:
+    url: '{{ asci_agent_url }}'
+    dest: '{{ tmp_dir }}/ActiveBatch_{{ activebatchv11_ver }}_linux.tar'
+  tags:
+    - 'download Ab agent tar'
+
+- name: Unzip AB11 Install zip
+  unarchive:
+    src:  '{{ tmp_dir }}/ActiveBatch_{{ activebatchv11_ver }}_linux.tar'
+    dest: '{{ abatagent_dir }}{{ activebatchv11_dir }}'
+    remote_src: yes
+  tags:
+    - 'uncompress ab tar'
+
+- name: Silent install of AB11
+  command: ./abatinstall -s -d {{ abatagent_dir }}{{ activebatchv11_dir }}
+  args:
+    chdir: '{{ abatagent_dir }}{{ activebatchv11_dir }}/'
+  become: yes
+  become_user: root
+  tags:
+    - 'install asci agent'
