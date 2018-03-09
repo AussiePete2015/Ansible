@@ -1,0 +1,16 @@
+# ASCI variables
+#
+abatagent_dir: /opt/ASCI
+activebatchv11_dir: /ActiveBatchV11
+
+activebatchv11_ver: Linux-11.0-v11_x3264
+
+asci_ver: 11.0
+
+tmp_dir: /tmp
+
+# Nexus Repository URL
+nexus_url: ../nexus/service/local/repositories/thirdparty/content/com
+#
+# Activebatch Agent
+asci_agent_url: '{{ nexus_url }}/Activebatch/ActiveBatch_Linux/{{ asci_ver }}/ActiveBatch_Linux-11.0-v11_x3264_linux.tar'
