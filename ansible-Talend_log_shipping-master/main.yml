@@ -1,0 +1,22 @@
+---
+- name: Copy logs to remote server
+  hosts: mdm_prod
+  become: yes
+  become_user: root
+  gather_facts: false
+
+  tasks:
+  - name: Include variables
+    include_vars: vars/main.yml
+
+# Comment out the talend yml files you dont require
+# to capture logs from
+  - import_tasks: tasks/mdm_noshutdown.yml
+#  - import_tasks: tasks/mdm.yml
+#  - import_tasks: tasks/js.yml
+#  - import_tasks: tasks/js_noshutdown.yml
+#  - import_tasks: tasks/tac.yml
+#  - import_tasks: tasks/esb.yml
+
+  handlers:
+    - import_tasks: handlers/main.yml
