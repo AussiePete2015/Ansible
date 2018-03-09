@@ -1,0 +1,24 @@
+# Create PostgreSQL accounts
+#
+#
+- postgresql_user:
+    db: '{{ pg_db }}'
+    login_host: localhost
+    login_user: '{{ pg_user }}'
+    login_password: '{{ pg_pwd }}'
+    name: '{{ pg_user_account }}'
+    password: '{{ pg_pwd_account }}'
+    priv: All
+    role_attr_flags: LOGIN,NOSUPERUSER,INHERIT,CREATEDB,NOCREATEROLE,REPLICATION
+    state: present
+  tags:
+    - 'Create pg user accounts'
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: '/data/pgsql/data/pg_hba.conf'
+    owner: '{{ pg_user }}'
+    group: '{{ pg_group }}'
+  tags:
+    - 'load pg_hba conf'
