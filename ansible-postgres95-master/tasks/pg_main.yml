@@ -1,0 +1,182 @@
+# Use Nexus Repository to install Postgresql
+- name: Download Postgresql pgdg-redhat95-9.5-3-noarch.rpm
+  get_url:
+    url: '{{ pg_noarch_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_noarch95 }}'
+  tags:
+    - 'download noarch'
+
+- name: Download Postgresql
+  get_url:
+    url: '{{ pg_postgres_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_postgres95 }}'
+  tags:
+    - 'download postgresql95'
+
+- name: Download Postgresql libs
+  get_url:
+    url: '{{ pg_libs_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_libs95 }}'
+  tags:
+    - 'download pg_libs95'
+
+- name: Download Postgresql contribs
+  get_url:
+    url: '{{ pg_contrib_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_contrib95 }}'
+  tags:
+    - 'download pg_contrib95'
+
+- name: Download Postgresql server
+  get_url:
+    url: '{{ pg_server_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_server95 }}'
+  tags:
+    - 'download pg_server95'
+
+- name: Download Postgresql plPy95
+  get_url:
+    url: '{{ pg_plpython_url }}'
+    dest: '{{ pg_tmp }}/{{ pg_plPy95 }}'
+  tags:
+    - 'download plPy95'
+
+# Create accounts and home directory
+- name: Create postgres group and user
+  group:
+    name: '{{pg_group}}'
+    state: present
+  tags:
+    - 'create pg group'
+
+- name: Create postgres user
+  user:
+    name: '{{ pg_user }}'
+    password: '{{ pg_pwd }}'
+    groups: '{{ pg_group }},wheel'
+    state: present
+    append: yes
+
+- name: create data directory "/data"
+  file:
+    path: '{{ pg_home_dir }}'
+    state: directory
+    mode: 0755
+    owner: '{{ pg_user }}'
+    group: '{{ pg_group }}'
+  tags:
+    - 'create data dir'
+
+- name: create data directory "/data/pgsql"
+  file:
+    path: '{{ pg_home_dir }}/pgsql'
+    state: directory
+    mode: 0755
+    owner: '{{ pg_user }}'
+    group: '{{ pg_group }}'
+  tags:
+    - 'create /data/psql dir'
+
+- name: create data directory "/data/pgsql/data"
+  file:
+    path: '{{ pg_home_dir }}/pgsql/data'
+    state: directory
+    mode: 0700
+    owner: '{{ pg_user }}'
+    group: '{{ pg_group }}'
+  tags:
+    - 'create /data/pgsql/data dir'
+
+# Install PostgreSQL Server & components using rpm -ivh
+- name: Install postgresql components noarch
+  yum:
+    name: '{{ pg_tmp }}/{{ item }}'
+    state: present
+  with_items:
+  - '{{ pg_noarch95 }}'
+  - '{{ pg_libs95 }}'
+  - '{{ pg_postgres95 }}'
+  - '{{ pg_contrib95 }}'
+  - '{{ pg_plPy95 }}'
+  - '{{ pg_server95 }}'
+  tags:
+    - 'install pg components'
+
+# Initialize PostgreSQL database
+- name: Check if PostgreSQL database is initialized
+  stat:
+    path: /data/pgsql/data/PG_VERSION
+  register: pgdata_dir_version
+  tags:
+    - 'check if pg dbinit'
+
+# Initialize PostgreSQL database
+- name: Initialise pg database
+  become: yes
+  become_user: '{{ pg_user }}'
+  command: '/usr/pgsql-9.5/bin/initdb -D /data/pgsql/data'
+  when: not pgdata_dir_version.stat.exists
+  tags:
+    - 'init pg db'
+
+- name: Create postgres user
+  user:
+    name: '{{ pg_user }}'
+    password: '{{ pg_pwd }}'
+    groups: '{{ pg_group }},wheel'
+    state: present
+    append: yes
+  tags:
+    - 'create postgres user'
+
+# Start the PostgreSQL database
+- name: Start PostgreSQL
+  become: yes
+  become_user: '{{ pg_user }}'
+  command: /usr/pgsql-9.5/bin/pg_ctl -D /data/pgsql/data -l logfile start
+  tags:
+    - 'start pg db'
+
+# Set the configuration for PostgreSQL
+- name: Configure postgresql.conf
+  template:
+    src: postgresql.conf.j2
+    dest: '/data/pgsql/data/postgresql.conf'
+    owner: '{{ pg_user }}'
+    group: '{{ pg_group }}'
+  tags:
+    - 'load postgresql.conf'
+
+- name: Configure postgresql-9.5 services
+  template:
+    src: postgresql-9.5.service.j2
+    dest: /usr/lib/systemd/system/postgresql-9.5.service
+    mode: 0755
+  tags:
+    - 'Load pg service file'
+
+# Start PostgreSQL services
+- name: reload-systemd
+  systemd:
+    name: postgresql-9.5.service
+    daemon-reload: yes
+    enabled: yes
+  tags:
+    - 'reload systemd'
+
+# - name: stop postgresql-9.5.service
+# shell: systemctl stop postgresql-9.5.service
+- service:
+    name: postgresql-9.5.service
+    state: restarted
+    enabled: yes
+  tags:
+    - 'restart pg'
+
+# - name: enable postgresql-9.5.service
+# shell: systemctl enable postgresql-9.5.service
+#- firewalld:
+#    port: 5432/tcp
+#    permanent: true
+#    state: enabled
+#  tags: 'firewall open 5432'
